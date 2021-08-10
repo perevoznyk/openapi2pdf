@@ -354,6 +354,7 @@ h2.title {
         margin-bottom: 0;
         font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
         font-size: 12px;
+        page-break-inside: avoid;
     }
 
     .markdown-body .octicon {
@@ -446,6 +447,7 @@ h2.title {
         padding: 0 1em;
         color: #6a737d;
         border-left: 0.25em solid #dfe2e5;
+        page-break-inside: avoid;
     }
 
         .markdown-body blockquote > :first-child {

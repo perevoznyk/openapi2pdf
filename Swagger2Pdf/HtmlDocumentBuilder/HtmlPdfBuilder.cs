@@ -1,8 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using iText.Html2pdf;
 using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.Layout.Properties;
 using log4net;
 using Swagger2Pdf.Model;
 using Swagger2Pdf.Model.Properties;
@@ -330,7 +334,9 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
         {
             var documentString = _document.GetDocumentString();
 
-            var pdfDocument = new PdfDocument(new PdfWriter(swaggerDocumentModel.PdfDocumentPath));
+            string fileName = System.IO.Path.GetTempFileName();
+
+            var pdfDocument = new PdfDocument(new PdfWriter(fileName));
 
             var properties = new ConverterProperties();
 
@@ -344,6 +350,20 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
             HtmlConverter.ConvertToDocument(documentString, pdfDocument, properties);
 
             pdfDocument.Close();
+
+            PdfDocument pdfDoc = new PdfDocument(new PdfReader(fileName), new PdfWriter(swaggerDocumentModel.PdfDocumentPath));
+            Document doc = new Document(pdfDoc);
+
+            int numberOfPages = pdfDoc.GetNumberOfPages();
+            for (int i = 2; i <= numberOfPages; i++)
+            {
+
+                // Write aligned text to the specified by parameters point
+                doc.ShowTextAligned(new Paragraph($"{i}"), 559, doc.GetBottomMargin() - 10, i, TextAlignment.RIGHT, VerticalAlignment.BOTTOM, 0);
+            }
+
+            doc.Close();
+            File.Delete(fileName);
         }
 
         protected void DrawTableRow(TableElement table, KeyValuePair<string, PropertyBase> property, string prefix, int offset, bool required = false)
