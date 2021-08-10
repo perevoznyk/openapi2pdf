@@ -6,7 +6,7 @@ namespace Swagger2Pdf.PdfModel.Model.Schemas.Serialization
     {
         protected override void WriteJson(JsonWriter writer, SimpleTypeSchema value, JsonSerializer serializer)
         {
-            serializer.Serialize(writer, value.ExampleValue);
+            serializer.Serialize(writer, value.Example);
         }
     }
 }

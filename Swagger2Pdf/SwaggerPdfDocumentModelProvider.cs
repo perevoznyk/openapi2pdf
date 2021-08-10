@@ -37,10 +37,16 @@ namespace Swagger2Pdf
             docModel.Version = parameters.Version ?? swaggerJsonInfo.SwaggerJsonInfo.Version;
             docModel.Author = parameters.Author ?? "";
             docModel.DocumentDate = DateTime.Now;
+            docModel.Description = swaggerJsonInfo.SwaggerJsonInfo.Description;
+            docModel.Name = swaggerJsonInfo.SwaggerJsonInfo.Contact.Name;
+            docModel.URL = swaggerJsonInfo.SwaggerJsonInfo.Contact.Url;
+            docModel.Email = swaggerJsonInfo.SwaggerJsonInfo.Contact.Email;
             docModel.DocumentationEntries = PrepareDocumentationEntries(parameters.EndpointFilters, swaggerJsonInfo);
             docModel.AuthorizationInfo = PrepareAuthorizationInfos(swaggerJsonInfo);
             docModel.CustomPageName = parameters.CustomPageName;
-
+            docModel.Tags = swaggerJsonInfo.Tags;
+            docModel.Definitions = _referenceResolver.Definitions;
+            docModel.ReferenceResolver = _referenceResolver;
             return docModel;
         }
 
@@ -98,7 +104,10 @@ namespace Swagger2Pdf
 
         private static Dictionary<string, AuthorizationInfo> PrepareAuthorizationInfos(SwaggerJsonModel swaggerJsonJsonModel)
         {
-            return swaggerJsonJsonModel.SecurityDefinitions.ToDictionary(x => x.Key, x => x.Value.CreateAuthorizationInfo());
+            if (swaggerJsonJsonModel.SecurityDefinitions != null)
+                return swaggerJsonJsonModel.SecurityDefinitions.ToDictionary(x => x.Key, x => x.Value.CreateAuthorizationInfo());
+            else
+                return null;
         }
 
         private static IEnumerable<EndpointInfo> BuildEndpointEntry(KeyValuePair<string, Dictionary<string, Operation>> path, SchemaResolutionContext schemaResolutionContext)
@@ -107,6 +116,7 @@ namespace Swagger2Pdf
             return path.Value.Select(httpMethod => new EndpointInfo
             {
                 EndpointPath = path.Key,
+                Tags = httpMethod.Value.Tags,
                 HttpMethod = httpMethod.Key.ToUpper(),
                 Deprecated = httpMethod.Value.Deprecated,
                 Summary = httpMethod.Value.Summary,
@@ -153,7 +163,8 @@ namespace Swagger2Pdf
                 MultipleOf = p.MultipleOf,
                 Pattern = p.Pattern,
                 Title = p.Title,
-                UniqueItems = p.UniqueItems
+                UniqueItems = p.UniqueItems,
+                Ref = p.Schema?.GetReference()
             };
         }
 
@@ -163,7 +174,8 @@ namespace Swagger2Pdf
             {
                 Code = responseKvp.Key,
                 Description = responseKvp.Value.Description,
-                Schema = responseKvp.Value.Schema?.ResolveSchema(resolutionContext)
+                Schema = responseKvp.Value.Schema?.ResolveSchema(resolutionContext),
+                Ref = responseKvp.Value.Schema?.GetReference()
             };
         }
     }

@@ -13,6 +13,7 @@ namespace Swagger2Pdf.PdfModel
         protected PdfBuilderBase(ILog logger)
         {
             Logger = logger;
+            
         }
 
         public void BuildPdf(SwaggerPdfDocumentModel swaggerDocumentModel)
@@ -30,12 +31,14 @@ namespace Swagger2Pdf.PdfModel
 
             Logger.Info("Drawing authorization info page");
             DrawAuthorizationInfoPage(swaggerDocumentModel);
-            BeginNewPage();
+           
             Logger.Info("Drawing authorization info page done.");
 
-            Logger.Info("Drawing drawing endpoint documentation");
+            Logger.Info("Drawing  endpoint documentation");
             DrawEndpointDocumentation(swaggerDocumentModel);
-            Logger.Info("Drawing drawing endpoint documentation done.");
+            Logger.Info("Drawing  endpoint documentation done.");
+
+            DrawModelDocumentation(swaggerDocumentModel);
 
             Logger.Info("Rendering PDF document");
             var fi = new FileInfo(swaggerDocumentModel.PdfDocumentPath);
@@ -65,8 +68,14 @@ namespace Swagger2Pdf.PdfModel
             }
         }
 
+        public SwaggerPdfDocumentModel DocumentModel { get; set; }
+
         private void DrawEndpointDocumentation(SwaggerPdfDocumentModel swaggerDocumentModel)
         {
+            this.DocumentModel = swaggerDocumentModel;
+            DrawEndpointContent(swaggerDocumentModel);
+            BeginNewPage();
+
             foreach (var docEntry in swaggerDocumentModel.DocumentationEntries)
             {   
                 DrawEndpointHeader(docEntry);
@@ -78,6 +87,8 @@ namespace Swagger2Pdf.PdfModel
                 BeginNewPage();
             }
         }
+
+        
 
         protected abstract void WriteCustomPage(StringWriter writer);
 
@@ -93,6 +104,8 @@ namespace Swagger2Pdf.PdfModel
 
         protected abstract void DrawEndpointHeader(EndpointInfo docEntry);
 
+        protected abstract void DrawEndpointContent(SwaggerPdfDocumentModel swaggerDocumentModel);
+
         protected abstract void DrawWelcomePage(SwaggerPdfDocumentModel swaggerDocumentModel);
 
         protected abstract void BeginNewPage();
@@ -100,5 +113,7 @@ namespace Swagger2Pdf.PdfModel
         protected abstract void SaveDocument(SwaggerPdfDocumentModel swaggerDocumentModel);
 
         protected abstract void DrawAuthorizationInfoPage(SwaggerPdfDocumentModel swaggerDocumentModel);
+
+        protected abstract void DrawModelDocumentation(SwaggerPdfDocumentModel swaggerDocumentModel);
     }
 }

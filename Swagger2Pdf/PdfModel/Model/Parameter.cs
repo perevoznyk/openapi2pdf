@@ -35,6 +35,7 @@ namespace Swagger2Pdf.PdfModel.Model
         public string Enum { get; set; }
         public Schema Schema { get; set; }
         public string Type { get; set; }
+        public string Ref { get; set; }
 
         public string GetMinMaxString()
         {

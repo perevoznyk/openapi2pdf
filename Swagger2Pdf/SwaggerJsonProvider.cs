@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using log4net;
+using YamlDotNet.Serialization;
 
 namespace Swagger2Pdf
 {
@@ -31,7 +32,23 @@ namespace Swagger2Pdf
                 throw new ArgumentException($"Swagger json does not exist: {inputFileName}");
             }
 
-            return File.ReadAllText(swaggerJsonFileInfo.FullName);
+           
+
+            if (swaggerJsonFileInfo.Extension.Equals(".yaml", StringComparison.OrdinalIgnoreCase))
+            {
+                var r = new StringReader(File.ReadAllText(swaggerJsonFileInfo.FullName));
+                var deserializer = new Deserializer();
+                var yamlObject = deserializer.Deserialize(r);
+
+                var w = new StringWriter();
+                var serializer = new Newtonsoft.Json.JsonSerializer();
+                serializer.Serialize(w, yamlObject);
+                return w.ToString();
+            }
+            else
+            {
+                return File.ReadAllText(swaggerJsonFileInfo.FullName);
+            }
         }
 
         private static string GetRemoteSwaggerJsonString(Uri swaggerJsonUri)

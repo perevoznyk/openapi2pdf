@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using Newtonsoft.Json;
 using Swagger2Pdf.PdfModel.Model;
 using Swagger2Pdf.PdfModel.Model.Schemas;
 
@@ -6,7 +8,13 @@ namespace Swagger2Pdf.Model.Properties
 {
     public sealed class ReferenceProperty : PropertyBase
     {
+
         public string Ref { get; set; }
+
+        public override string GetReference()
+        {
+            return Ref.Split('/').Last();
+        }
 
         public override Schema ResolveSchema(SchemaResolutionContext resolutionContext)
         {
@@ -18,9 +26,19 @@ namespace Swagger2Pdf.Model.Properties
                 throw new ArgumentException($"Unable to resolve definition for reference code: {Ref}");
             }
 
-            foreach (var property in definition.Properties)
+            if (string.IsNullOrEmpty(Description))
+                Description = definition.Description;
+            if (definition.Properties != null)
             {
-                complexTypeSchema.AddProperty(property.Key, property.Value?.ResolveSchema(resolutionContext));
+                foreach (var property in definition.Properties)
+                {
+                    complexTypeSchema.AddProperty(property.Key, property.Value?.ResolveSchema(resolutionContext));
+                }
+            }
+            else
+            {
+                SimpleTypeSchema simple = new SimpleTypeSchema(definition.Type, null, definition.Example);
+                return simple;
             }
 
             return complexTypeSchema;

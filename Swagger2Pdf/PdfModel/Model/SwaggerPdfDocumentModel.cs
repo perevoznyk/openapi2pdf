@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Swagger2Pdf.Model;
+using Swagger2Pdf.Model.ReferenceResolver;
+using System;
 using System.Collections.Generic;
 
 namespace Swagger2Pdf.PdfModel.Model
@@ -11,8 +13,15 @@ namespace Swagger2Pdf.PdfModel.Model
         public string Title { get; set; }
         public string Version { get; set; }
         public string Author { get; set; }
+        public string Description { get; set; }
+        public string Name { get; set; }
+        public string URL { get; set; }
+        public string Email { get; set; }
         public DateTime DocumentDate { get; set; }
         public Dictionary<string, AuthorizationInfo> AuthorizationInfo { get; set; }
         public string CustomPageName { get; set; }
+        public Tag[] Tags { get; set; }
+        public Dictionary<string, Definition> Definitions { get; set; }
+        public ReferenceResolver ReferenceResolver { get; set; }
     }
 }

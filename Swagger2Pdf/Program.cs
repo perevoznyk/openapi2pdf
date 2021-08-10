@@ -3,6 +3,7 @@ using System.Reflection;
 using CommandLine;
 using log4net;
 using log4net.Config;
+using log4net.Util;
 using Swagger2Pdf.HtmlDocumentBuilder;
 using Swagger2Pdf.PdfModel;
 
@@ -24,6 +25,7 @@ namespace Swagger2Pdf
         {
             var loggerRepository = LogManager.CreateRepository(Assembly.GetEntryAssembly(), typeof(log4net.Repository.Hierarchy.Hierarchy));
             BasicConfigurator.Configure(loggerRepository);
+            SystemInfo.NullText = "";
         }
 
         private static void ConfigureCommandLineParser(ParserSettings obj)

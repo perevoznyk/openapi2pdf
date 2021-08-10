@@ -9,6 +9,14 @@ namespace Swagger2Pdf.Model
         [JsonProperty("description")]
         public string Description { get; set; }
 
+        [JsonProperty("example")]
+        public object Example { get; set; }
+
         public abstract Schema ResolveSchema(SchemaResolutionContext resolutionContext);
+
+        public virtual string GetReference()
+        {
+            return string.Empty;
+        }
     }
 }

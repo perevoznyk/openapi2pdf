@@ -7,5 +7,6 @@ namespace Swagger2Pdf.PdfModel.Model
         public string Code { get; set; }
         public string Description { get; set; }
         public Schema Schema { get; set; }
+        public string Ref { get; set; }
     }
 }

@@ -12,12 +12,9 @@ namespace Swagger2Pdf.Model.Properties
         [JsonProperty("type")]
         public string Type { get; set; }
 
-        [JsonProperty("example")]
-        public object ExampleValue { get; set; }
-
         public override Schema ResolveSchema(SchemaResolutionContext resolutionContext)
         {
-            return new SimpleTypeSchema(Type, Format, ExampleValue);
+            return new SimpleTypeSchema(Type, Format, Example);
         }
     }
 }

@@ -12,6 +12,13 @@ namespace Swagger2Pdf.Model
 
         [JsonProperty("properties")]
         public Dictionary<string, PropertyBase> Properties { get; set; }
+
+        [JsonProperty("description")]
+        public string Description { get; set; }
+
+        [JsonProperty("example")]
+        public object Example { get; set; }
+
     }
 
     public class DefinitionReferenceProperty 

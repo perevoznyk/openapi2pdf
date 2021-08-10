@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2008
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31515.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Swagger2Pdf", "Swagger2Pdf\Swagger2Pdf.csproj", "{273FBE15-CC1F-40F2-96B3-A3F4EB33B0C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Swagger2Pdf.Tests", "Swagger2Pdf.Tests\Swagger2Pdf.Tests.csproj", "{78C6B602-B308-4182-BD7C-335FDDA7DE76}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Swagger2Pdf.Tests", "Swagger2Pdf.Tests\Swagger2Pdf.Tests.csproj", "{78C6B602-B308-4182-BD7C-335FDDA7DE76}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

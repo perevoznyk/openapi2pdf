@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Swagger2Pdf.Model.Properties;
@@ -20,17 +21,40 @@ namespace Swagger2Pdf.Model.Converters
             var type = jObject["type"]?.ToString();
 
             if (!string.IsNullOrEmpty(@ref))
-            {   
+            {
                 return ResolveReferenceProperty(jObject);
             }
-            
+
             if (!string.IsNullOrEmpty(@enum))
             {
                 return CreateEnumProperty(jObject);
             }
 
+            if (string.IsNullOrEmpty(type) )
+            {
+                //Assume this is array
+                if (jObject["items"] != null)
+                {
+                    return new ArrayProperty
+                    {
+                        Description = jObject["description"]?.ToString(),
+                        Type = "array",
+                        Items = CreateItemsProperty(jObject["items"]),
+                        CollectionFormat = jObject["collectionFormat"]?.ToString()
+                    };
+                }
+            }
+
+            if (!string.IsNullOrEmpty(type) && type == "object")
+            {
+
+                var O = JsonConvert.DeserializeObject<ObjectProperty>(jObject.ToString(), new PropertyBaseJsonConverter());
+                return O;
+
+            }
+
             if (!string.IsNullOrEmpty(type) && type == "array")
-            {   
+            {
                 return new ArrayProperty
                 {
                     Description = jObject["description"]?.ToString(),
@@ -43,13 +67,18 @@ namespace Swagger2Pdf.Model.Converters
             return CreateSimpleProperty(jObject);
         }
 
+        private ObjectProperty CreateObjectProperty(JToken jObject)
+        {
+            return JsonConvert.DeserializeObject<ObjectProperty>(jObject.ToString(), new PropertyBaseJsonConverter());
+        }
+
         private EnumSimpleTypeProperty CreateEnumProperty(JToken jObject)
         {
             return new EnumSimpleTypeProperty
             {
                 Type = jObject["type"]?.ToString(),
                 Format = jObject["format"]?.ToString(),
-                ExampleValue = jObject["exampleValue"]?.ToObject<object>(),
+                Example = jObject["example"]?.ToObject<object>(),
                 CollectionFormat = jObject["collectionFormat"]?.ToString(),
                 Default = jObject["default"]?.ToObject<object>(),
                 Description = jObject["description"]?.ToString(),
@@ -64,7 +93,7 @@ namespace Swagger2Pdf.Model.Converters
                 Type = jObject["type"]?.ToString(),
                 Format = jObject["format"]?.ToString(),
                 Description = jObject["description"]?.ToString(),
-                ExampleValue = jObject["exampleValue"]?.ToObject<object>()
+                Example = jObject["example"]?.ToObject<object>()
             };
         }
 
@@ -78,6 +107,26 @@ namespace Swagger2Pdf.Model.Converters
             if (@enum != null)
             {
                 return CreateEnumProperty(jObject);
+            }
+
+            var type = jObject["type"]?.ToString();
+            if (!string.IsNullOrEmpty(type) && type == "object")
+            {
+                return CreateObjectProperty(jObject);
+            }
+
+            if (type.IsNullOrEmpty())
+            {
+                if (jObject["items"] != null)
+                {
+                    return new ArrayProperty
+                    {
+                        Description = jObject["description"]?.ToString(),
+                        Type = "array",
+                        Items = CreateItemsProperty(jObject["items"]),
+                        CollectionFormat = jObject["collectionFormat"]?.ToString()
+                    };
+                }
             }
 
             return CreateSimpleProperty(jObject);
