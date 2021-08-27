@@ -23,5 +23,6 @@ namespace Swagger2Pdf.PdfModel.Model
         public Tag[] Tags { get; set; }
         public Dictionary<string, Definition> Definitions { get; set; }
         public ReferenceResolver ReferenceResolver { get; set; }
+        public string Security { get; set; }
     }
 }

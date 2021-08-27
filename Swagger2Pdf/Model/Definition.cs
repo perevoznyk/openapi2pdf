@@ -19,6 +19,9 @@ namespace Swagger2Pdf.Model
         [JsonProperty("example")]
         public object Example { get; set; }
 
+        [JsonProperty("required")]
+        public IList<string> Required { get; set; }
+
     }
 
     public class DefinitionReferenceProperty 

@@ -30,6 +30,9 @@ namespace Swagger2Pdf
         [Option('v', "version", Required = false, HelpText = "Overrides version obtained from swagger.json")]
         public string Version { get; set; }
 
+        [Option('s', "security", Required = false, HelpText = "The security level of the document")]
+        public string Security { get; set; }
+
 #if WIN
         [Usage(ApplicationAlias = "swagger2pdf.exe")]
 #else

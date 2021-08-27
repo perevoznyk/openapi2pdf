@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using iText.Html2pdf;
+using iText.IO.Font.Constants;
+using iText.Kernel.Font;
+using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 using iText.Layout;
 using iText.Layout.Element;
@@ -12,6 +15,7 @@ using Swagger2Pdf.Model;
 using Swagger2Pdf.Model.Properties;
 using Swagger2Pdf.PdfModel;
 using Swagger2Pdf.PdfModel.Model;
+using Swagger2Pdf.PdfModel.Model.Schemas;
 
 namespace Swagger2Pdf.HtmlDocumentBuilder
 {
@@ -50,7 +54,13 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
 
                 if (!string.IsNullOrEmpty(response.Ref))
                 {
-                    _document.P().SetText($"Reference: {response.Ref}").SetStyle("font-size", "12px");
+                    var link = new Link().Href("#" + response.Ref);
+                    link.SetText("Reference: " + response.Ref);
+
+                    _document.P().AddChildElement(link).SetStyle("font-size", "12px");
+
+                    //_document.P().SetText($"Reference: {response.Ref}").SetStyle("font-size", "12px");
+
                     var definition = DocumentModel.ReferenceResolver.ResolveReference(response.Ref);
                     if (definition != null)
                     {
@@ -60,6 +70,7 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                             table.AddColumns(new TextContent("NAME"), new TextContent("TYPE"), new TextContent("DESCRIPTION"));
                             foreach (var property in definition.Properties)
                             {
+                                
                                 DrawTableRow(table, property, "", 0);
                                 if (property.Value is ReferenceProperty)
                                 {
@@ -103,45 +114,100 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
 
                 if (!string.IsNullOrEmpty(bodyParameter.Ref))
                 {
-                    _document.P().SetText($"Reference: {bodyParameter.Ref}").SetStyle("font-size", "12px");
+                    var link = new Link().Href("#" + bodyParameter.Ref);
+                    link.SetText("Reference: " + bodyParameter.Ref);
+
+                    _document.P().AddChildElement(link).SetStyle("font-size", "12px");
+                    //_document.P().SetText($"Reference: {bodyParameter.Ref}").SetStyle("font-size", "12px");
                 }
                 var schema = PdfModelJsonConverter.SerializeObject(bodyParameter.Schema);
                 _document.Pre().SetText(schema);
 
-                if (!string.IsNullOrEmpty(bodyParameter.Ref))
+                if (bodyParameter.Schema is ComplexTypeSchema)
                 {
-                    var definition = DocumentModel.ReferenceResolver.ResolveReference(bodyParameter.Ref);
-                    if (definition != null)
+                    var properties = (bodyParameter.Schema as ComplexTypeSchema).Properties;
+                    if (properties != null)
                     {
-                        if (definition.Properties != null)
+                        var table = _document.Table();
+                        table.AddColumns(new TextContent("NAME"), new TextContent("TYPE"), new TextContent("DESCRIPTION"));
+                        foreach (var property in properties)
                         {
-                            var table = _document.Table();
-                            table.AddColumns(new TextContent("NAME"), new TextContent("TYPE"), new TextContent("DESCRIPTION"));
-                            foreach (var property in definition.Properties)
+                            bool required = false;
+                            if ((bodyParameter.Schema as ComplexTypeSchema).Required != null)
                             {
-                                DrawTableRow(table, property, "", 0);
-                                if (property.Value is ReferenceProperty)
+                                required = (bodyParameter.Schema as ComplexTypeSchema).Required.Contains(property.Key);
+                            }
+
+                            DrawTableRow(table, property, "", 0, required);
+                            if (property.Value is ComplexTypeSchema)
+                            {
+                                var referrenceproperty = (property.Value as ComplexTypeSchema);
+                                
+                                if (referrenceproperty != null)
                                 {
-                                    var referrenceproperty = (property.Value as ReferenceProperty);
-                                    var subDefinition = DocumentModel.ReferenceResolver.ResolveReference(referrenceproperty.Ref);
-                                    if (subDefinition != null)
+                                    foreach (var subitem in referrenceproperty.Properties)
                                     {
-                                        foreach (var subitem in subDefinition.Properties)
+                                        required = false;
+                                        if (referrenceproperty.Required != null)
                                         {
-                                            DrawTableRow(table, subitem, property.Key, 0);
+                                            required = referrenceproperty.Required.Contains(subitem.Key);
                                         }
+                                        DrawTableRow(table, subitem, property.Key, 1, required);
                                     }
                                 }
-                                if (property.Value is ObjectProperty)
+                            }
+
+                        }
+                    }
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(bodyParameter.Ref))
+                    {
+                        var definition = DocumentModel.ReferenceResolver.ResolveReference(bodyParameter.Ref);
+                        if (definition != null)
+                        {
+                            if (definition.Properties != null)
+                            {
+                                var table = _document.Table();
+                                table.AddColumns(new TextContent("NAME"), new TextContent("TYPE"), new TextContent("DESCRIPTION"));
+                                foreach (var property in definition.Properties)
                                 {
-                                    var objectProperty = (property.Value as ObjectProperty);
-                                    DrawObjectProperty(table, property.Key, objectProperty, 0);
+                                    bool required = false;
+                                    if (definition.Required != null)
+                                    {
+                                        required = definition.Required.Contains(property.Key);
+                                    }
+
+                                    DrawTableRow(table, property, "", 0, required);
+                                    if (property.Value is ReferenceProperty)
+                                    {
+                                        var referrenceproperty = (property.Value as ReferenceProperty);
+                                        var subDefinition = DocumentModel.ReferenceResolver.ResolveReference(referrenceproperty.Ref);
+                                        if (subDefinition != null)
+                                        {
+                                            foreach (var subitem in subDefinition.Properties)
+                                            {
+                                                required = false;
+                                                if (subDefinition.Required != null)
+                                                {
+                                                    required = subDefinition.Required.Contains(subitem.Key);
+                                                }
+                                                DrawTableRow(table, subitem, property.Key, 0, required);
+                                            }
+                                        }
+                                    }
+                                    if (property.Value is ObjectProperty)
+                                    {
+                                        var objectProperty = (property.Value as ObjectProperty);
+                                        DrawObjectProperty(table, property.Key, objectProperty, 0);
+
+                                    }
 
                                 }
-
                             }
-                        }
-                    } //definition
+                        } //definition
+                    } //REF
                 }
             }
 
@@ -226,11 +292,14 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
 
             foreach (var docEntry in swaggerDocumentModel.DocumentationEntries)
             {
-                for (int i = 0; i < docEntry.Tags.Length; i++)
+                if (docEntry.Tags != null)
                 {
-                    if (tags.IndexOf(docEntry.Tags[i]) < 0)
+                    for (int i = 0; i < docEntry.Tags.Length; i++)
                     {
-                        tags.Add(docEntry.Tags[i]);
+                        if (tags.IndexOf(docEntry.Tags[i]) < 0)
+                        {
+                            tags.Add(docEntry.Tags[i]);
+                        }
                     }
                 }
             }
@@ -245,7 +314,10 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                     {
                         if (docEntry.Tags.Contains<string>(tag))
                         {
-                            list.AddChildElement(new TextContent($"{docEntry.HttpMethod} {docEntry.EndpointPath}"));
+                            var link = new Link().Href("#" + docEntry.HttpMethod + "-" + docEntry.EndpointPath);
+                            link.SetText($"{docEntry.HttpMethod} {docEntry.EndpointPath}");
+                            list.AddChildElement(link);
+                            //list.AddChildElement(new TextContent($"{docEntry.HttpMethod} {docEntry.EndpointPath}"));
                         }
                     }
                 }
@@ -255,14 +327,20 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                 var list = _document.Ol();
                 foreach (var docEntry in swaggerDocumentModel.DocumentationEntries)
                 {
-                    list.AddChildElement(new TextContent($"{docEntry.HttpMethod} {docEntry.EndpointPath}"));
+                    var link = new Link().Href("#" + docEntry.HttpMethod + "-" + docEntry.EndpointPath);
+                    link.SetText($"{docEntry.HttpMethod} {docEntry.EndpointPath}");
+                    list.AddChildElement(link);
+                    //list.AddChildElement(new TextContent($"{docEntry.HttpMethod} {docEntry.EndpointPath}"));
                 }
             }
             _document.H2().Bold().SetText("Models");
             var modelsList = _document.Ol();
             foreach (var item in swaggerDocumentModel.Definitions)
             {
-                modelsList.AddChildElement(new TextContent(item.Key));
+                var link = new Link().Href("#" + item.Key);
+                link.SetText(item.Key);
+                //modelsList.AddChildElement(new TextContent(item.Key));
+                modelsList.AddChildElement(link);
             }
 
         }
@@ -270,14 +348,53 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
         {
             if (docEntry.Deprecated)
             {
-                _document.H1().Bold().Deleted().SetText($"{docEntry.HttpMethod} {docEntry.EndpointPath}");
-                _document.P().Deleted().SetText(docEntry.Summary);
-                _document.P().SetText("Deprecated").SetStyle("color", "orangered");
+                _document.H1().Bold().Deleted().SetText($"{docEntry.HttpMethod} {docEntry.EndpointPath}").SetStyle(" margin-bottom", "0px")
+                    .SetAttribute("id", docEntry.HttpMethod + "-" + docEntry.EndpointPath); 
+                _document.P().Deleted().SetText(docEntry.Summary).SetStyle(" margin-bottom", "0px");
+                _document.P().SetText("Deprecated").SetStyle("color", "orangered").SetStyle(" margin-bottom", "0px");
             }
             else
             {
-                _document.H1().Bold().SetText($"{docEntry.HttpMethod} {docEntry.EndpointPath}").SetStyle("color", "#DE5600");
-                _document.P().SetText(docEntry.Summary);
+                _document.H1().Bold().SetText($"{docEntry.HttpMethod} {docEntry.EndpointPath}").SetStyle("color", "#DE5600")
+                    .SetAttribute("id", docEntry.HttpMethod + "-" + docEntry.EndpointPath);
+                if (!string.IsNullOrEmpty(docEntry.Summary))
+                {
+                    _document.P().Bold().SetText("Summary:").SetStyle(" margin-bottom", "0px");
+                    _document.P().SetText(docEntry.Summary).SetStyle(" margin-bottom", "0px");
+                }
+            }
+
+            
+            if (!string.IsNullOrEmpty(docEntry.Desciption))
+            {
+                _document.P().Bold().SetText("Description:").SetStyle(" margin-bottom", "0px");
+                _document.P().SetText(docEntry.Desciption).SetStyle(" margin-bottom", "0px");
+            }
+
+            if (docEntry.Consumes != null)
+            {
+                if (docEntry.Consumes.Length > 0)
+                {
+                    _document.P().Bold().SetText("Consumes:").SetStyle(" margin-bottom", "0px").SetStyle(" margin-bottom", "0px");
+                    var list = _document.Ul().SetStyle(" margin-bottom", "0px");
+                    foreach (var entry in docEntry.Consumes)
+                    {
+                        list.AddChildElement(new TextContent(entry));
+                    }
+                }
+            }
+
+            if (docEntry.Produces != null)
+            {
+                if (docEntry.Produces.Length > 0)
+                {
+                    _document.P().Bold().SetText("Produces:").SetStyle(" margin-bottom", "0px");
+                    var list = _document.Ul();
+                    foreach (var entry in docEntry.Produces)
+                    {
+                        list.AddChildElement(new TextContent(entry));
+                    }
+                }
             }
         }
 
@@ -316,12 +433,18 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                 swaggerDocumentModel.Description.IfNotNull(x => _document.P().Left().SetText(x).SetStyle(" margin-bottom", "0px"));
             }
 
-            _document.P().Left().SetText("Contact:").SetStyle("font-size", "16px").SetStyle("color", "#005b96").SetStyle(" margin-bottom", "0px");
-            swaggerDocumentModel.Name.IfNotNull(x => _document.P().Left().SetText(x).SetStyle(" margin-bottom", "0px"));
-            swaggerDocumentModel.URL.IfNotNull(x => _document.P().Left().SetText($"URL: {x}").SetStyle(" margin-bottom", "0px"));
-            swaggerDocumentModel.Email.IfNotNull(x => _document.P().Left().SetText($"Email: {x}").SetStyle(" margin-bottom", "0px"));
+            if (!string.IsNullOrEmpty(swaggerDocumentModel.Name) || !string.IsNullOrEmpty(swaggerDocumentModel.URL) || !(string.IsNullOrEmpty(swaggerDocumentModel.Email)))
+            {
+                _document.P().Left().SetText("Contact:").SetStyle("font-size", "16px").SetStyle("color", "#005b96").SetStyle(" margin-bottom", "0px");
+                swaggerDocumentModel.Name.IfNotNull(x => _document.P().Left().SetText(x).SetStyle(" margin-bottom", "0px"));
+                swaggerDocumentModel.URL.IfNotNull(x => _document.P().Left().SetText($"URL: {x}").SetStyle(" margin-bottom", "0px"));
+                swaggerDocumentModel.Email.IfNotNull(x => _document.P().Left().SetText($"Email: {x}").SetStyle(" margin-bottom", "0px"));
+            }
 
-
+            if (swaggerDocumentModel.Security != null)
+            {
+                _document.P().Left().SetText(swaggerDocumentModel.Security).SetStyle("font-size", "16px").SetStyle("color", "#005b96").SetStyle(" margin-bottom", "0px");
+            }
 
         }
 
@@ -359,11 +482,78 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
             {
 
                 // Write aligned text to the specified by parameters point
+                if (!string.IsNullOrEmpty(swaggerDocumentModel.Title))
+                {
+                    Rectangle pageSize = pdfDoc.GetPage(i).GetPageSize();
+                    float x = pageSize.GetWidth() / 2;
+                    doc.SetFontSize(9);
+                    doc.SetFont(PdfFontFactory.CreateFont(StandardFonts.HELVETICA));
+                    doc.ShowTextAligned(new Paragraph($"{swaggerDocumentModel.Title} API reference"), x, doc.GetBottomMargin() - 10, i, TextAlignment.CENTER, VerticalAlignment.BOTTOM, 0);
+                }
                 doc.ShowTextAligned(new Paragraph($"{i}"), 559, doc.GetBottomMargin() - 10, i, TextAlignment.RIGHT, VerticalAlignment.BOTTOM, 0);
             }
 
             doc.Close();
             File.Delete(fileName);
+        }
+
+        protected void DrawTableRow(TableElement table, KeyValuePair<string, Schema> property, string prefix, int offset, bool required = false)
+        {
+            string _name;
+            if (!string.IsNullOrEmpty(prefix))
+            {
+                _name = prefix + ".";
+            }
+            else
+            {
+                _name = "";
+            }
+
+            var nameCell = HtmlElement.Label().SetText($"{_name}{property.Key}" ?? "");
+            if (offset > 0)
+            {
+                int i = 6 * offset;
+                nameCell.SetStyle("padding-left", $"{i}px");
+            }
+
+            if (required)
+            {
+                nameCell.AddChildElement(HtmlElement.Label().SetText("*").SetStyle("color", "red"));
+            }
+
+            string desc = "";
+            
+            if (string.IsNullOrEmpty(desc))
+            {
+                if (property.Value is SimpleTypeSchema)
+                {
+                    if (!string.IsNullOrEmpty((property.Value as SimpleTypeSchema).Description))
+                    {
+                        desc = (property.Value as SimpleTypeSchema).Description;
+                    }
+                    else
+                    {
+                        if ((property.Value as SimpleTypeSchema).Example != null)
+                        {
+                            desc = PdfModelJsonConverter.SerializeObject((property.Value as SimpleTypeSchema).Example);
+                        }
+                    }
+                }
+            }
+
+            var descriptionCell = new TextContent(desc ?? "");
+            string propertyType = "";
+            if (property.Value is SimpleTypeSchema)
+                propertyType = (property.Value as SimpleTypeSchema).Type;
+            if (property.Value is ArraySchema)
+                propertyType = "array";
+            if (property.Value is EnumTypeSchema)
+                propertyType = "enum";
+            
+            if (property.Value is ComplexTypeSchema)
+                propertyType = "object";
+            var typeCell = new TextContent(propertyType ?? "");
+            table.AddRow(nameCell, typeCell, descriptionCell);
         }
 
         protected void DrawTableRow(TableElement table, KeyValuePair<string, PropertyBase> property, string prefix, int offset, bool required = false)
@@ -412,16 +602,27 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                 propertyType = "array";
             if (property.Value is EnumSimpleTypeProperty)
                 propertyType = "enum";
+
+            Link propertyLink = null;
             if (property.Value is ReferenceProperty)
             {
                 var referrenceproperty = (property.Value as ReferenceProperty);
-                propertyType = "see: " + referrenceproperty.Ref.Split('/').Last();
-
+                var referenceName = referrenceproperty.Ref.Split('/').Last();
+                propertyType = "see: " + referenceName;
+                propertyLink = new Link().Href("#" + referenceName);
+                propertyLink.SetText(propertyType) ;
             }
             if (property.Value is ObjectProperty)
                 propertyType = "object";
             var typeCell = new TextContent(propertyType ?? "");
-            table.AddRow(nameCell, typeCell, descriptionCell);
+            if (propertyLink == null)
+            {
+                table.AddRow(nameCell, typeCell, descriptionCell);
+            }
+            else
+            {
+                table.AddRow(nameCell, propertyLink, descriptionCell);
+            }
         }
 
         protected void DrawObjectProperty(TableElement table, string prefix, ObjectProperty objectProperty, int offset)
@@ -468,18 +669,20 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                 {
                     itemTitle = item.Key + ": " + item.Value.Type;
                 }
-                _document.P();
-                _document.H2().SetText(itemTitle);
+                _document.P();//.AddChildElement(new Link().SetAttribute("id", item.Key));
+                _document.H2().SetText(itemTitle).SetAttribute("id", item.Key).SetStyle("page -break-after", "avoid"); ;
                 item.Value.Description.IfNotNull(x => _document.P().Left().SetText(x).SetStyle(" margin-bottom", "0px"));
                 if (item.Value.Example != null)
                 {
                     var sample = PdfModelJsonConverter.SerializeObject(item.Value.Example);
                     _document.Pre().Left().SetText($"Example: {sample}").SetStyle(" margin-bottom", "0px");
+                    _document.P();
                 }
 
                 if (item.Value.Properties != null)
                 {
 
+                   
                     var table = _document.Table();
                     table.AddColumns(new TextContent("NAME"), new TextContent("TYPE"), new TextContent("DESCRIPTION"));
                     foreach (var property in item.Value.Properties)
@@ -491,9 +694,12 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                             var definition = swaggerDocumentModel.ReferenceResolver.ResolveReference(referrenceproperty.Ref);
                             if (definition != null)
                             {
-                                foreach (var subitem in definition.Properties)
+                                if (definition.Properties != null)
                                 {
-                                    DrawTableRow(table, subitem, property.Key, 0);
+                                    foreach (var subitem in definition.Properties)
+                                    {
+                                        DrawTableRow(table, subitem, property.Key, 0);
+                                    }
                                 }
                             }
                         }

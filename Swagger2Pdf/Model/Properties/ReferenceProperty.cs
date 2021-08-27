@@ -28,6 +28,9 @@ namespace Swagger2Pdf.Model.Properties
 
             if (string.IsNullOrEmpty(Description))
                 Description = definition.Description;
+
+            complexTypeSchema.Required = definition.Required;
+
             if (definition.Properties != null)
             {
                 foreach (var property in definition.Properties)
@@ -37,7 +40,7 @@ namespace Swagger2Pdf.Model.Properties
             }
             else
             {
-                SimpleTypeSchema simple = new SimpleTypeSchema(definition.Type, null, definition.Example);
+                SimpleTypeSchema simple = new SimpleTypeSchema(definition.Type, null, definition.Example, definition.Description);
                 return simple;
             }
 

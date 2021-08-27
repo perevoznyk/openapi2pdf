@@ -12,7 +12,10 @@ namespace Swagger2Pdf.PdfModel.Model
         public string HttpMethod { get; set; }
         public bool Deprecated { get; set; }
         public string Summary { get; set; }
+        public string Desciption { get; set; }
         public List<Parameter> PathParameters { get; set; }
         public string[] Tags { get; set; }
+        public string[] Consumes { get; set; }
+        public string[] Produces { get; set; }
     }
 }

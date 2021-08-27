@@ -5,11 +5,12 @@ namespace Swagger2Pdf.PdfModel.Model.Schemas
 {
     public class SimpleTypeSchema : Schema
     {
-        public SimpleTypeSchema(string type, string format, object example)
+        public SimpleTypeSchema(string type, string format, object example, string description)
         {
             Type = type;
             Format = format;
             Example = example ?? GetExampleValue(type, format);
+            Description = description ?? string.Empty;
         }
 
         private static int CurrentIdentifier = 0;
@@ -18,6 +19,7 @@ namespace Swagger2Pdf.PdfModel.Model.Schemas
         public string Type { get; }
         public string Format { get; }
         public object Example { get; }
+        public string Description { get; }
 
         private static object GetExampleValue(string type, string format)
         {

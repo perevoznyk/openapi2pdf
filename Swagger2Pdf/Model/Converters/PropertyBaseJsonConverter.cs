@@ -43,6 +43,12 @@ namespace Swagger2Pdf.Model.Converters
                         CollectionFormat = jObject["collectionFormat"]?.ToString()
                     };
                 }
+
+                if (jObject["properties"] != null)
+                {
+                    var O = JsonConvert.DeserializeObject<ObjectProperty>(jObject.ToString(), new PropertyBaseJsonConverter());
+                    return O;
+                }
             }
 
             if (!string.IsNullOrEmpty(type) && type == "object")

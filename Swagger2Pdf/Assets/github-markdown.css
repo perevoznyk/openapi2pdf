@@ -279,6 +279,7 @@ h2.title {
     .markdown-body h6 {
         margin-top: 0;
         margin-bottom: 0;
+        page-break-after: avoid;
     }
 
     .markdown-body h1 {
@@ -290,6 +291,7 @@ h2.title {
         font-size: 18px;
         font-weight: 600;
         color: #005b96;
+        page-break-after: avoid;
     }
 
     .markdown-body h3 {
@@ -728,3 +730,23 @@ h2.title {
     .markdown-body hr {
         border-bottom-color: #eee;
     }
+
+/* unvisited link */
+a:link {
+    color: black;
+}
+
+/* visited link */
+a:visited {
+    color: black;
+}
+
+/* mouse over link */
+a:hover {
+    color: blue;
+}
+
+/* selected link */
+a:active {
+    color: blue;
+}

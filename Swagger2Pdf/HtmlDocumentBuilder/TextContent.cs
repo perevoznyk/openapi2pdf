@@ -39,20 +39,23 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
             for(int i = 0; i < _textContentLines.Count; i++)
             {
                 var text = _textContentLines[i];
-                if (_lineWithinBreakShouldBeAdded.Count != 0 && i == _lineWithinBreakShouldBeAdded.Peek())
+                if (text != null)
                 {
-                    htmlStringBuilder.Append("<br>");
-                    _lineWithinBreakShouldBeAdded.Dequeue();
-                }
-                foreach (var c in text)
-                {
-                    if (HtmlCodes.TryGetValue(c, out string replacement))
+                    if (_lineWithinBreakShouldBeAdded.Count != 0 && i == _lineWithinBreakShouldBeAdded.Peek())
                     {
-                        htmlStringBuilder.Append(replacement);
-                        continue;
+                        htmlStringBuilder.Append("<br>");
+                        _lineWithinBreakShouldBeAdded.Dequeue();
                     }
+                    foreach (var c in text)
+                    {
+                        if (HtmlCodes.TryGetValue(c, out string replacement))
+                        {
+                            htmlStringBuilder.Append(replacement);
+                            continue;
+                        }
 
-                    htmlStringBuilder.Append(c);
+                        htmlStringBuilder.Append(c);
+                    }
                 }
             }
         }

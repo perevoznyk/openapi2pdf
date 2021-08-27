@@ -14,7 +14,7 @@ namespace Swagger2Pdf.Model.Properties
 
         public override Schema ResolveSchema(SchemaResolutionContext resolutionContext)
         {
-            return new SimpleTypeSchema(Type, Format, Example);
+            return new SimpleTypeSchema(Type, Format, Example, Description);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Swagger2Pdf.PdfModel.Model.Schemas
@@ -6,6 +7,9 @@ namespace Swagger2Pdf.PdfModel.Model.Schemas
     public class ComplexTypeSchema : Schema
     {
         private readonly Dictionary<string, Schema> _documentationObject;
+
+        [JsonProperty("required")]
+        public IList<string> Required { get; set; }
 
         public ComplexTypeSchema()
         {

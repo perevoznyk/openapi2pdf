@@ -38,9 +38,21 @@ namespace Swagger2Pdf
             docModel.Author = parameters.Author ?? "";
             docModel.DocumentDate = DateTime.Now;
             docModel.Description = swaggerJsonInfo.SwaggerJsonInfo.Description;
-            docModel.Name = swaggerJsonInfo.SwaggerJsonInfo.Contact.Name;
-            docModel.URL = swaggerJsonInfo.SwaggerJsonInfo.Contact.Url;
-            docModel.Email = swaggerJsonInfo.SwaggerJsonInfo.Contact.Email;
+            docModel.Security = parameters.Security;
+
+            if (swaggerJsonInfo.SwaggerJsonInfo.Contact != null)
+            {
+                docModel.Name = swaggerJsonInfo.SwaggerJsonInfo.Contact.Name;
+                docModel.URL = swaggerJsonInfo.SwaggerJsonInfo.Contact.Url;
+                docModel.Email = swaggerJsonInfo.SwaggerJsonInfo.Contact.Email;
+            }
+            else
+            {
+                docModel.Name = "";
+                docModel.URL = "";
+                docModel.Email = "";
+            }
+
             docModel.DocumentationEntries = PrepareDocumentationEntries(parameters.EndpointFilters, swaggerJsonInfo);
             docModel.AuthorizationInfo = PrepareAuthorizationInfos(swaggerJsonInfo);
             docModel.CustomPageName = parameters.CustomPageName;
@@ -120,6 +132,9 @@ namespace Swagger2Pdf
                 HttpMethod = httpMethod.Key.ToUpper(),
                 Deprecated = httpMethod.Value.Deprecated,
                 Summary = httpMethod.Value.Summary,
+                Desciption = httpMethod.Value.Description,
+                Produces = httpMethod.Value.Produces,
+                Consumes = httpMethod.Value.Consumes,
                 QueryParameter = httpMethod.Value.OperationParameters?.Where(x => x.In == "query")
                     .Select(parameter => BuildParameter(parameter, schemaResolutionContext))
                     .ToList(),
