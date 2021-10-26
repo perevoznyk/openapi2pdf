@@ -24,5 +24,9 @@ namespace Swagger2Pdf.PdfModel.Model
         public Dictionary<string, Definition> Definitions { get; set; }
         public ReferenceResolver ReferenceResolver { get; set; }
         public string Security { get; set; }
+        public string BasePath { get; set; }
+        public string Host { get; set; }
+        public List<ItemsTag> ItemsTags { get; set; }
+        public int ModelIndex { get; set; }
     }
 }

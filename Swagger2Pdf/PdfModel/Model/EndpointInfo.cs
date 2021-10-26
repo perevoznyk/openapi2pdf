@@ -17,5 +17,7 @@ namespace Swagger2Pdf.PdfModel.Model
         public string[] Tags { get; set; }
         public string[] Consumes { get; set; }
         public string[] Produces { get; set; }
+        public int ItemOrderNumber { get; set; }
+        public int TagOrder { get; set; }
     }
 }

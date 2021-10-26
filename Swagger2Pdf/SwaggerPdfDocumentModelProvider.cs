@@ -39,6 +39,8 @@ namespace Swagger2Pdf
             docModel.DocumentDate = DateTime.Now;
             docModel.Description = swaggerJsonInfo.SwaggerJsonInfo.Description;
             docModel.Security = parameters.Security;
+            docModel.BasePath = swaggerJsonInfo.BasePath;
+            docModel.Host = swaggerJsonInfo.Host;
 
             if (swaggerJsonInfo.SwaggerJsonInfo.Contact != null)
             {

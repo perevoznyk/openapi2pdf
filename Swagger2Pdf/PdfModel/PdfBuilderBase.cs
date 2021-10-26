@@ -76,15 +76,37 @@ namespace Swagger2Pdf.PdfModel
             DrawEndpointContent(swaggerDocumentModel);
             BeginNewPage();
 
-            foreach (var docEntry in swaggerDocumentModel.DocumentationEntries)
-            {   
-                DrawEndpointHeader(docEntry);
-                DrawPathParameters(docEntry.PathParameters ?? new List<Parameter>());
-                DrawQueryParameters(docEntry.QueryParameter ?? new List<Parameter>());
-                DrawFormDataParameters(docEntry.FormDataParameters ?? new List<Parameter>());
-                DrawBodyParameters(docEntry.BodyParameters ?? new List<Parameter>());
-                DrawResponses(docEntry.Responses);
-                BeginNewPage();
+            if (swaggerDocumentModel.ItemsTags.Count > 0)
+            {
+                foreach (var tag in swaggerDocumentModel.ItemsTags)
+                {
+                    DrawTagHeader(tag);
+                    int itemIndex = 0;
+                    foreach (var docEntry in tag.Items)
+                    {
+                        docEntry.ItemOrderNumber = ++itemIndex;
+                        DrawEndpointHeader(docEntry);
+                        DrawPathParameters(docEntry.PathParameters ?? new List<Parameter>());
+                        DrawQueryParameters(docEntry.QueryParameter ?? new List<Parameter>());
+                        DrawFormDataParameters(docEntry.FormDataParameters ?? new List<Parameter>());
+                        DrawBodyParameters(docEntry.BodyParameters ?? new List<Parameter>());
+                        DrawResponses(docEntry.Responses);
+                        BeginNewPage();
+                    }
+                }
+            }
+            else
+            {
+                foreach (var docEntry in swaggerDocumentModel.DocumentationEntries)
+                {
+                    DrawEndpointHeader(docEntry);
+                    DrawPathParameters(docEntry.PathParameters ?? new List<Parameter>());
+                    DrawQueryParameters(docEntry.QueryParameter ?? new List<Parameter>());
+                    DrawFormDataParameters(docEntry.FormDataParameters ?? new List<Parameter>());
+                    DrawBodyParameters(docEntry.BodyParameters ?? new List<Parameter>());
+                    DrawResponses(docEntry.Responses);
+                    BeginNewPage();
+                }
             }
         }
 
@@ -115,5 +137,8 @@ namespace Swagger2Pdf.PdfModel
         protected abstract void DrawAuthorizationInfoPage(SwaggerPdfDocumentModel swaggerDocumentModel);
 
         protected abstract void DrawModelDocumentation(SwaggerPdfDocumentModel swaggerDocumentModel);
+
+        protected abstract void DrawTagHeader(ItemsTag tag);
+
     }
 }

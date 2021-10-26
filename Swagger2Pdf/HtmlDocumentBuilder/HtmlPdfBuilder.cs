@@ -282,40 +282,57 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
 
         }
 
+        protected override void DrawTagHeader(ItemsTag tag)
+        {
+            _document.H2().Bold().SetText($"{tag.Order}. " + tag.Name);
+        }
 
         protected override void DrawEndpointContent(SwaggerPdfDocumentModel swaggerDocumentModel)
         {
             _document.H1().Bold().SetText("INDEX");
 
+            swaggerDocumentModel.ItemsTags = new List<ItemsTag>();
 
-            List<string> tags = new List<string>();
-
+            int tagNumber = 0;
             foreach (var docEntry in swaggerDocumentModel.DocumentationEntries)
             {
                 if (docEntry.Tags != null)
                 {
                     for (int i = 0; i < docEntry.Tags.Length; i++)
                     {
-                        if (tags.IndexOf(docEntry.Tags[i]) < 0)
+                        var element = swaggerDocumentModel.ItemsTags.Find(e => e.Name.Equals(docEntry.Tags[i]));
+                        if (element == null)
                         {
-                            tags.Add(docEntry.Tags[i]);
+                            ItemsTag tag = new ItemsTag();
+                            tag.Name = docEntry.Tags[i];
+                            
+                            
+                            swaggerDocumentModel.ItemsTags.Add(tag);
                         }
                     }
                 }
             }
 
-            if (tags.Count > 0)
+            if (swaggerDocumentModel.ItemsTags.Count > 0)
             {
-                foreach (var tag in tags)
+                
+                swaggerDocumentModel.ItemsTags.Sort((x, y) => x.Name.CompareTo(y.Name));
+
+                foreach (var tag in swaggerDocumentModel.ItemsTags)
                 {
-                    _document.H2().Bold().SetText(tag);
-                    var list = _document.Ol();
+                    tag.Order = ++tagNumber;
+                    _document.H2().Bold().SetText($"{tag.Order}. " + tag.Name);
+                    var list = _document.Ul().SetStyle("list-style-type", "none");
+                    int itemNumber = 0;
                     foreach (var docEntry in swaggerDocumentModel.DocumentationEntries)
                     {
-                        if (docEntry.Tags.Contains<string>(tag))
+                        if (docEntry.Tags.Contains<string>(tag.Name))
                         {
+                            tag.Items.Add(docEntry);
+                            docEntry.ItemOrderNumber = ++itemNumber;
+                            docEntry.TagOrder = tag.Order;
                             var link = new Link().Href("#" + docEntry.HttpMethod + "-" + docEntry.EndpointPath);
-                            link.SetText($"{docEntry.HttpMethod} {docEntry.EndpointPath}");
+                            link.SetText($"{tag.Order}.{docEntry.ItemOrderNumber}. {docEntry.HttpMethod} {docEntry.EndpointPath}");
                             list.AddChildElement(link);
                             //list.AddChildElement(new TextContent($"{docEntry.HttpMethod} {docEntry.EndpointPath}"));
                         }
@@ -324,21 +341,27 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
             }
             else
             {
+                int entryIndex = 0;
                 var list = _document.Ol();
                 foreach (var docEntry in swaggerDocumentModel.DocumentationEntries)
                 {
                     var link = new Link().Href("#" + docEntry.HttpMethod + "-" + docEntry.EndpointPath);
                     link.SetText($"{docEntry.HttpMethod} {docEntry.EndpointPath}");
                     list.AddChildElement(link);
+                    docEntry.ItemOrderNumber = ++entryIndex;
                     //list.AddChildElement(new TextContent($"{docEntry.HttpMethod} {docEntry.EndpointPath}"));
                 }
             }
-            _document.H2().Bold().SetText("Models");
-            var modelsList = _document.Ol();
+            ++tagNumber;
+            _document.H2().Bold().SetText($"{tagNumber}. " + "Models");
+            swaggerDocumentModel.ModelIndex = tagNumber;
+            var modelsList = _document.Ul().SetStyle("list-style-type", "none");
+            int modelNumber = 0;
             foreach (var item in swaggerDocumentModel.Definitions)
             {
+                modelNumber++;
                 var link = new Link().Href("#" + item.Key);
-                link.SetText(item.Key);
+                link.SetText($"{tagNumber}.{modelNumber}. " + item.Key);
                 //modelsList.AddChildElement(new TextContent(item.Key));
                 modelsList.AddChildElement(link);
             }
@@ -348,14 +371,14 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
         {
             if (docEntry.Deprecated)
             {
-                _document.H1().Bold().Deleted().SetText($"{docEntry.HttpMethod} {docEntry.EndpointPath}").SetStyle(" margin-bottom", "0px")
+                _document.H1().Bold().Deleted().SetText($"{docEntry.TagOrder}.{docEntry.ItemOrderNumber}. {docEntry.HttpMethod} {docEntry.EndpointPath}").SetStyle(" margin-bottom", "0px")
                     .SetAttribute("id", docEntry.HttpMethod + "-" + docEntry.EndpointPath); 
                 _document.P().Deleted().SetText(docEntry.Summary).SetStyle(" margin-bottom", "0px");
                 _document.P().SetText("Deprecated").SetStyle("color", "orangered").SetStyle(" margin-bottom", "0px");
             }
             else
             {
-                _document.H1().Bold().SetText($"{docEntry.HttpMethod} {docEntry.EndpointPath}").SetStyle("color", "#DE5600")
+                _document.H1().Bold().SetText($"{docEntry.TagOrder}.{docEntry.ItemOrderNumber}. {docEntry.HttpMethod} {docEntry.EndpointPath}").SetStyle("color", "#DE5600")
                     .SetAttribute("id", docEntry.HttpMethod + "-" + docEntry.EndpointPath);
                 if (!string.IsNullOrEmpty(docEntry.Summary))
                 {
@@ -431,6 +454,12 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
             {
                 _document.P().Left().SetText("Description:").SetStyle("font-size", "16px").SetStyle("color", "#005b96").SetStyle(" margin-bottom", "0px");
                 swaggerDocumentModel.Description.IfNotNull(x => _document.P().Left().SetText(x).SetStyle(" margin-bottom", "0px"));
+            }
+
+            if (swaggerDocumentModel.BasePath != null)
+            {
+                _document.P().Left().SetText("Base path:").SetStyle("font-size", "16px").SetStyle("color", "#005b96").SetStyle(" margin-bottom", "0px");
+                swaggerDocumentModel.BasePath.IfNotNull(x => _document.P().Left().SetText(x).SetStyle(" margin-bottom", "0px"));
             }
 
             if (!string.IsNullOrEmpty(swaggerDocumentModel.Name) || !string.IsNullOrEmpty(swaggerDocumentModel.URL) || !(string.IsNullOrEmpty(swaggerDocumentModel.Email)))
@@ -658,16 +687,20 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
 
             _document.H1().SetText("Models");
 
+            int modelNumber = 0;
+
             foreach (var item in swaggerDocumentModel.Definitions)
             {
                 string itemTitle;
+                modelNumber++;
+
                 if (item.Value.Properties != null)
                 {
-                    itemTitle = item.Key;
+                    itemTitle = $"{swaggerDocumentModel.ModelIndex}.{modelNumber}. " + item.Key;
                 }
                 else
                 {
-                    itemTitle = item.Key + ": " + item.Value.Type;
+                    itemTitle = $"{swaggerDocumentModel.ModelIndex}.{modelNumber}. " + item.Key + ": " + item.Value.Type;
                 }
                 _document.P();//.AddChildElement(new Link().SetAttribute("id", item.Key));
                 _document.H2().SetText(itemTitle).SetAttribute("id", item.Key).SetStyle("page -break-after", "avoid"); ;
