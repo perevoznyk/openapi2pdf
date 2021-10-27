@@ -107,19 +107,28 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
 
             foreach (var bodyParameter in docEntryBodyParameters)
             {
-                if (!string.IsNullOrEmpty(bodyParameter.Description))
+                var tableParam = _document.Table();
+                tableParam.AddColumns(new TextContent("NAME"), new TextContent("DESCRIPTION"), new TextContent("REFERENCE"));
+                var nameCell = HtmlElement.Label().SetText(bodyParameter.Name ?? "");
+                if (bodyParameter.IsRequired)
                 {
-                    _document.P().SetText(bodyParameter.Description).SetStyle("font-size", "12px");
+                    nameCell.AddChildElement(HtmlElement.Label().SetText("*").SetStyle("color", "red"));
                 }
-
+                var typeCell = HtmlElement.Label().SetText("");
                 if (!string.IsNullOrEmpty(bodyParameter.Ref))
                 {
                     var link = new Link().Href("#" + bodyParameter.Ref);
                     link.SetText("Reference: " + bodyParameter.Ref);
 
-                    _document.P().AddChildElement(link).SetStyle("font-size", "12px");
-                    //_document.P().SetText($"Reference: {bodyParameter.Ref}").SetStyle("font-size", "12px");
+                    typeCell.AddChildElement(link);
                 }
+
+                var descriptionCell = new TextContent(bodyParameter.Description ?? "");
+                
+                tableParam.AddRow(nameCell, descriptionCell, typeCell);
+
+
+
                 var schema = PdfModelJsonConverter.SerializeObject(bodyParameter.Schema);
                 _document.Pre().SetText(schema);
 
