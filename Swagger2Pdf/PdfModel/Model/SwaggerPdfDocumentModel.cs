@@ -21,7 +21,7 @@ namespace Swagger2Pdf.PdfModel.Model
         public Dictionary<string, AuthorizationInfo> AuthorizationInfo { get; set; }
         public string CustomPageName { get; set; }
         public Tag[] Tags { get; set; }
-        public Dictionary<string, Definition> Definitions { get; set; }
+        public SortedDictionary<string, Definition> Definitions { get; set; }
         public ReferenceResolver ReferenceResolver { get; set; }
         public string Security { get; set; }
         public string BasePath { get; set; }

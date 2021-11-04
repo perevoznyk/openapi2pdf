@@ -651,7 +651,6 @@ h2.title {
 
     .markdown-body pre {
         word-break: break-all;
-        overflow-wrap: anywhere;
         white-space: pre-wrap;
     }
 
@@ -660,7 +659,6 @@ h2.title {
             margin: 0;
             font-size: 100%;
             word-break: break-all;
-            overflow-wrap: anywhere;
             white-space: pre-wrap;
             background: transparent;
             border: 0;
@@ -673,7 +671,6 @@ h2.title {
         .markdown-body .highlight pre {
             margin-bottom: 0;
             word-break: break-all;
-            overflow-wrap: anywhere;
         }
 
         .markdown-body .highlight pre,
@@ -694,7 +691,6 @@ h2.title {
                 overflow: visible;
                 line-height: inherit;
                 word-break: break-all;
-                overflow-wrap: anywhere;
                 background-color: transparent;
                 border: 0;
             }

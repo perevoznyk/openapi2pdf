@@ -9,8 +9,57 @@ namespace Swagger2Pdf.PdfModel.Model.Schemas
         {
             Type = type;
             Format = format;
-            Example = example ?? GetExampleValue(type, format);
+            object example_value = null;
+            switch (type)
+            {
+                case "string": example_value = example;
+                    break;
+                case "integer": example_value = Convert.ToInt32(example);
+                    break;
+                case "number": example_value = Convert.ToDouble(example);
+                    break;
+                case "object": example_value = example;
+                    break;
+                case "boolean": example_value = Convert.ToBoolean(example);
+                    break;
+                default: example_value = example;
+                    break;
+            }
+            Example = example_value ?? GetExampleValue(type, format);
             Description = description ?? string.Empty;
+        }
+
+        public static object ExampleToObject(string type, object example)
+        {
+            object example_value = null;
+            if (string.IsNullOrEmpty(type))
+                return example;
+            switch (type)
+            {
+                case "string":
+                    example_value = example;
+                    break;
+                case "integer":
+                    example_value = Convert.ToInt32(example);
+                    break;
+                case "number":
+                    example_value = Convert.ToDouble(example);
+                    break;
+                case "object":
+                    example_value = example;
+                    break;
+                case "boolean":
+                    example_value = Convert.ToBoolean(example);
+                    break;
+                default:
+                    example_value = example;
+                    break;
+            }
+            if (example_value == null)
+            {
+                example_value = string.Empty;
+            }
+            return example_value;
         }
 
         private static int CurrentIdentifier = 0;

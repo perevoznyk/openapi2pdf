@@ -10,6 +10,8 @@ namespace Swagger2Pdf.PdfModel
     {
         public readonly ILog Logger;
 
+        protected SwaggerPdfDocumentModel currentModel;
+
         protected PdfBuilderBase(ILog logger)
         {
             Logger = logger;
@@ -19,7 +21,7 @@ namespace Swagger2Pdf.PdfModel
         public void BuildPdf(SwaggerPdfDocumentModel swaggerDocumentModel)
         {
             Logger.Info("Building pdf document");
-
+            currentModel = swaggerDocumentModel;
             Logger.Info("Drawing welcome page");
             DrawWelcomePage(swaggerDocumentModel);
             BeginNewPage();

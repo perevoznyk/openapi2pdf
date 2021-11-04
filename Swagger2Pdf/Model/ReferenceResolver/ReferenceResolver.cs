@@ -8,7 +8,7 @@ namespace Swagger2Pdf.Model.ReferenceResolver
     public class ReferenceResolver
     {
         [JsonProperty("definitions")]
-        public Dictionary<string, Definition> Definitions { get; set; } = new Dictionary<string, Definition>();
+        public SortedDictionary<string, Definition> Definitions { get; set; } = new SortedDictionary<string, Definition>();
 
         public Definition ResolveReference(string reference)
         {   

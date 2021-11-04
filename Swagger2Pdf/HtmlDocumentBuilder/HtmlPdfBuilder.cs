@@ -70,7 +70,7 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                             table.AddColumns(new TextContent("NAME"), new TextContent("TYPE"), new TextContent("DESCRIPTION"));
                             foreach (var property in definition.Properties)
                             {
-                                
+
                                 DrawTableRow(table, property, "", 0);
                                 if (property.Value is ReferenceProperty)
                                 {
@@ -124,7 +124,7 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                 }
 
                 var descriptionCell = new TextContent(bodyParameter.Description ?? "");
-                
+
                 tableParam.AddRow(nameCell, descriptionCell, typeCell);
 
 
@@ -151,7 +151,7 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                             if (property.Value is ComplexTypeSchema)
                             {
                                 var referrenceproperty = (property.Value as ComplexTypeSchema);
-                                
+
                                 if (referrenceproperty != null)
                                 {
                                     foreach (var subitem in referrenceproperty.Properties)
@@ -314,8 +314,8 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                         {
                             ItemsTag tag = new ItemsTag();
                             tag.Name = docEntry.Tags[i];
-                            
-                            
+
+
                             swaggerDocumentModel.ItemsTags.Add(tag);
                         }
                     }
@@ -324,7 +324,7 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
 
             if (swaggerDocumentModel.ItemsTags.Count > 0)
             {
-                
+
                 swaggerDocumentModel.ItemsTags.Sort((x, y) => x.Name.CompareTo(y.Name));
 
                 foreach (var tag in swaggerDocumentModel.ItemsTags)
@@ -366,6 +366,7 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
             swaggerDocumentModel.ModelIndex = tagNumber;
             var modelsList = _document.Ul().SetStyle("list-style-type", "none");
             int modelNumber = 0;
+
             foreach (var item in swaggerDocumentModel.Definitions)
             {
                 modelNumber++;
@@ -381,7 +382,7 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
             if (docEntry.Deprecated)
             {
                 _document.H1().Bold().Deleted().SetText($"{docEntry.TagOrder}.{docEntry.ItemOrderNumber}. {docEntry.HttpMethod} {docEntry.EndpointPath}").SetStyle(" margin-bottom", "0px")
-                    .SetAttribute("id", docEntry.HttpMethod + "-" + docEntry.EndpointPath); 
+                    .SetAttribute("id", docEntry.HttpMethod + "-" + docEntry.EndpointPath);
                 _document.P().Deleted().SetText(docEntry.Summary).SetStyle(" margin-bottom", "0px");
                 _document.P().SetText("Deprecated").SetStyle("color", "orangered").SetStyle(" margin-bottom", "0px");
             }
@@ -396,7 +397,7 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                 }
             }
 
-            
+
             if (!string.IsNullOrEmpty(docEntry.Desciption))
             {
                 _document.P().Bold().SetText("Description:").SetStyle(" margin-bottom", "0px");
@@ -560,26 +561,37 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
             }
 
             string desc = "";
-            
-            if (string.IsNullOrEmpty(desc))
+
+
+            if (property.Value is SimpleTypeSchema)
             {
-                if (property.Value is SimpleTypeSchema)
+                if (!string.IsNullOrEmpty((property.Value as SimpleTypeSchema).Description))
                 {
-                    if (!string.IsNullOrEmpty((property.Value as SimpleTypeSchema).Description))
+                    desc = (property.Value as SimpleTypeSchema).Description;
+                }
+
+            }
+
+
+            //var descriptionCell = new TextContent(desc ?? "");
+            var descriptionCell = HtmlElement.Label().SetText(desc ?? "").SetStyle("white-space", "pre-wrap").SetStyle("word-break", "break-all");
+            if (property.Value is SimpleTypeSchema)
+            {
+                if ((property.Value as SimpleTypeSchema).Example != null)
+                {
+                    SimpleTypeSchema simpleType = property.Value as SimpleTypeSchema;
+                    var sampletext = PdfModelJsonConverter.SerializeObject(SimpleTypeSchema.ExampleToObject(simpleType.Type, simpleType.Example));
+                    if (!string.IsNullOrEmpty(sampletext))
                     {
-                        desc = (property.Value as SimpleTypeSchema).Description;
-                    }
-                    else
-                    {
-                        if ((property.Value as SimpleTypeSchema).Example != null)
+                        if (!string.IsNullOrEmpty(desc))
                         {
-                            desc = PdfModelJsonConverter.SerializeObject((property.Value as SimpleTypeSchema).Example);
+                            descriptionCell.AddChildElement(HtmlElement.Br());
                         }
+                        descriptionCell.AddChildElement(HtmlElement.Label().SetText("Example: " + sampletext));
                     }
                 }
             }
 
-            var descriptionCell = new TextContent(desc ?? "");
             string propertyType = "";
             if (property.Value is SimpleTypeSchema)
                 propertyType = (property.Value as SimpleTypeSchema).Type;
@@ -587,11 +599,30 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                 propertyType = "array";
             if (property.Value is EnumTypeSchema)
                 propertyType = "enum";
-            
+
             if (property.Value is ComplexTypeSchema)
                 propertyType = "object";
             var typeCell = new TextContent(propertyType ?? "");
             table.AddRow(nameCell, typeCell, descriptionCell);
+        }
+
+        protected string TypeToString(PropertyBase property)
+        {
+            string propertyType = "";
+            if (property is SimpleTypeProperty)
+                propertyType = (property as SimpleTypeProperty).Type;
+            if (property is ArrayProperty)
+                propertyType = "array";
+            if (property is EnumSimpleTypeProperty)
+                propertyType = "enum";
+            if (property is ObjectProperty)
+                propertyType = "object";
+            return propertyType;
+        }
+
+        protected string TypeToString(Definition property)
+        {
+            return property.Type;
         }
 
         protected void DrawTableRow(TableElement table, KeyValuePair<string, PropertyBase> property, string prefix, int offset, bool required = false)
@@ -624,34 +655,95 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                 desc = property.Value.Description;
             }
 
-            if (string.IsNullOrEmpty(desc))
+            string propertyType = TypeToString(property.Value);
+            string sampleText = string.Empty;
+
+
+            if (property.Value.Example != null)
             {
-                if (property.Value.Example != null)
+                sampleText = PdfModelJsonConverter.SerializeObject(SimpleTypeSchema.ExampleToObject(propertyType, property.Value.Example));
+                if (sampleText == "\"\"")
                 {
-                    desc = PdfModelJsonConverter.SerializeObject(property.Value.Example);
+                    sampleText = string.Empty;
                 }
             }
 
-            var descriptionCell = new TextContent(desc ?? "");
-            string propertyType = "";
-            if (property.Value is SimpleTypeProperty)
-                propertyType = (property.Value as SimpleTypeProperty).Type;
-            if (property.Value is ArrayProperty)
-                propertyType = "array";
-            if (property.Value is EnumSimpleTypeProperty)
-                propertyType = "enum";
+
+            if (property.Value is ObjectProperty)
+            {
+                propertyType = "object";
+            }
+
 
             Link propertyLink = null;
+            ReferenceProperty referrenceproperty = null;
+
             if (property.Value is ReferenceProperty)
             {
-                var referrenceproperty = (property.Value as ReferenceProperty);
-                var referenceName = referrenceproperty.Ref.Split('/').Last();
-                propertyType = "see: " + referenceName;
-                propertyLink = new Link().Href("#" + referenceName);
-                propertyLink.SetText(propertyType) ;
+                referrenceproperty = (property.Value as ReferenceProperty);
             }
-            if (property.Value is ObjectProperty)
-                propertyType = "object";
+
+            if (property.Value is ArrayProperty)
+            {
+                if ((property.Value as ArrayProperty).Items is ReferenceProperty)
+                {
+                    referrenceproperty = ((property.Value as ArrayProperty).Items as ReferenceProperty);
+                }
+                else
+                {
+                    var arrayItemType = TypeToString((property.Value as ArrayProperty).Items);
+                    if (!arrayItemType.IsNullOrEmpty())
+                    {
+                        propertyType = "array of " + arrayItemType;
+                    }
+                }
+            }
+
+            if (referrenceproperty != null)
+            {
+                var referenceName = referrenceproperty.Ref.Split('/').Last();
+                var definition = currentModel.ReferenceResolver.ResolveReference(referrenceproperty.Ref);
+                if (definition != null)
+                {
+                    propertyType = definition.Type;
+                    if (!string.IsNullOrEmpty(definition.Description))
+                    {
+                        desc = definition.Description;
+                    }
+
+
+                    if (definition.Example != null)
+                    {
+                        sampleText = PdfModelJsonConverter.SerializeObject(SimpleTypeSchema.ExampleToObject(definition.Type, definition.Example));
+                    }
+
+                }
+
+                if (!string.IsNullOrEmpty(propertyType))
+                {
+                    propertyType = propertyType + ", ";
+                }
+                else
+                {
+                    propertyType = "";
+                }
+                propertyType = propertyType + "see: " + @"<b>" + referenceName + @"</b>";
+                propertyLink = new Link().Href("#" + referenceName);
+                propertyLink.SetText(propertyType);
+            }
+
+
+            var descriptionCell = HtmlElement.Label().SetText(desc ?? "").SetStyle("white-space", "pre-wrap").SetStyle("word-break", "break-all");
+            //TextContent(desc ?? "").SetStyle("white-space", "pre-wrap");
+            if (!string.IsNullOrEmpty(sampleText))
+            {
+                if (!string.IsNullOrEmpty(desc))
+                {
+                    descriptionCell.AddChildElement(HtmlElement.Br());
+                }
+                descriptionCell.AddChildElement(HtmlElement.Label().SetText("Example: " + sampleText));
+            }
+
             var typeCell = new TextContent(propertyType ?? "");
             if (propertyLink == null)
             {
@@ -716,7 +808,8 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                 item.Value.Description.IfNotNull(x => _document.P().Left().SetText(x).SetStyle(" margin-bottom", "0px"));
                 if (item.Value.Example != null)
                 {
-                    var sample = PdfModelJsonConverter.SerializeObject(item.Value.Example);
+                    string propertyType = TypeToString(item.Value);
+                    var sample = PdfModelJsonConverter.SerializeObject(SimpleTypeSchema.ExampleToObject(propertyType, item.Value.Example));
                     _document.Pre().Left().SetText($"Example: {sample}").SetStyle(" margin-bottom", "0px");
                     _document.P();
                 }
@@ -724,7 +817,7 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
                 if (item.Value.Properties != null)
                 {
 
-                   
+
                     var table = _document.Table();
                     table.AddColumns(new TextContent("NAME"), new TextContent("TYPE"), new TextContent("DESCRIPTION"));
                     foreach (var property in item.Value.Properties)
