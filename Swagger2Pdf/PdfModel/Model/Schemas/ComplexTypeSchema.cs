@@ -26,5 +26,7 @@ namespace Swagger2Pdf.PdfModel.Model.Schemas
         }
 
         public IReadOnlyDictionary<string, Schema> Properties => new ReadOnlyDictionary<string, Schema>(_documentationObject);
+
+        public string Ref { get; set; }
     }
 }

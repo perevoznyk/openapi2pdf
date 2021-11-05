@@ -19,6 +19,7 @@ namespace Swagger2Pdf.Model.Properties
         public override Schema ResolveSchema(SchemaResolutionContext resolutionContext)
         {
             var complexTypeSchema = new ComplexTypeSchema();
+            complexTypeSchema.Ref = Ref;
             var definition = resolutionContext.ReferenceResolver.ResolveReference(Ref);
 
             if (definition == null)

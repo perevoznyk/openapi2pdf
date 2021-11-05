@@ -2,7 +2,7 @@
   "profiles": {
     "Swagger2Pdf": {
       "commandName": "Project",
-      "commandLineArgs": "--input PMS.yaml --output ./PMS.pdf "
+      "commandLineArgs": "--input WEDAS.yaml --output ./WEDAS.pdf "
     }
   }
 }
