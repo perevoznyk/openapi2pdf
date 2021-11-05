@@ -1,13 +1,13 @@
 [![Build status](https://dev.azure.com/andrzejderylo/swagger2pdf/_apis/build/status/swagger2pdf-netcore)](https://dev.azure.com/andrzejderylo/swagger2pdf/_build/latest?definitionId=3)
 
 # swagger2pdf
-console tool for generating pdf documents out of `swagger.json` file 
+Console tool for generating pdf documents out of `swagger.json` or `swagger.yaml` file. Initially forked from https://github.com/andrzejderylo/swagger2pdf, this project goes its own way
 
 # Features:
-- Generate pdf from `swagger.json`
+- Generate pdf from `swagger.json`  or `swagger.yaml`
 - Include company logo on first page
 - Include custom page created with .md right after welcome page
-- Override `swagger.json` author name
+- Override `swagger.json`  or `swagger.yaml` author name
 - Filter endpoints which needs to be printed to pdf doc (wildcards supported)
 
 # Thanks
@@ -18,7 +18,7 @@ a boss.
 - Authors & contributors of [CommonMark.NET](https://github.com/Knagis/CommonMark.NET/) for providing such easy way to parse .md files.
 
 # Endpoints markup
-I had to separate somehow HTTP verb from path (but could not use space) so tool has some special small markup designed only for this purpose. Verb is separated from path by ':' (colon). 
+
 For filtering sake, following combinations are allowed: 
 - `GET:/pet` - only endpoint with that specific verb and path is taken under consideration
 - `/pet` - all endpoints matching this path regardless verb are taken under consideration
