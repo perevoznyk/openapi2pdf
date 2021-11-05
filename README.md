@@ -1,6 +1,6 @@
 [![Build status](https://dev.azure.com/andrzejderylo/swagger2pdf/_apis/build/status/swagger2pdf-netcore)](https://dev.azure.com/andrzejderylo/swagger2pdf/_build/latest?definitionId=3)
 
-# swagger2pdf
+# openapi2pdf
 Console tool for generating pdf documents out of `swagger.json` or `swagger.yaml` file. Initially forked from https://github.com/andrzejderylo/swagger2pdf, this project goes its own way
 
 # Features:
