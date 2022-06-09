@@ -34,7 +34,7 @@ namespace Swagger2Pdf
 
            
 
-            if (swaggerJsonFileInfo.Extension.Equals(".yaml", StringComparison.OrdinalIgnoreCase))
+            if ( (swaggerJsonFileInfo.Extension.Equals(".yaml", StringComparison.OrdinalIgnoreCase)) || (swaggerJsonFileInfo.Extension.Equals(".yml", StringComparison.OrdinalIgnoreCase)))
             {
                 var r = new StringReader(File.ReadAllText(swaggerJsonFileInfo.FullName));
                 var deserializer = new Deserializer();

@@ -8,6 +8,7 @@ namespace Swagger2Pdf.PdfModel.Model
         public List<Parameter> QueryParameter { get; set; }
         public List<Parameter> BodyParameters { get; set; }
         public List<Parameter> FormDataParameters { get; set; }
+        public List<Parameter> HeaderParameters { get; set; }
         public List<Response> Responses { get; set; }
         public string HttpMethod { get; set; }
         public bool Deprecated { get; set; }

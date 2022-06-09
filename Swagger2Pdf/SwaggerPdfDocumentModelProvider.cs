@@ -143,6 +143,9 @@ namespace Swagger2Pdf
                 BodyParameters = httpMethod.Value.OperationParameters?.Where(x => x.In == "body")
                     .Select(parameter => BuildParameter(parameter, schemaResolutionContext))
                     .ToList(),
+                HeaderParameters = httpMethod.Value.OperationParameters?.Where(x => x.In == "header")
+                    .Select(parameter => BuildParameter(parameter, schemaResolutionContext))
+                    .ToList(),
                 FormDataParameters = httpMethod.Value.OperationParameters?.Where(x => x.In == "formData")
                     .Select(parameter => BuildParameter(parameter, schemaResolutionContext))
                     .ToList(),

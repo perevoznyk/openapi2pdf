@@ -268,6 +268,29 @@ namespace Swagger2Pdf.HtmlDocumentBuilder
             }
         }
 
+        protected override void DrawHeaderParameters(List<Parameter> docEntryHeaderParameter)
+        {
+            if (!docEntryHeaderParameter.Any()) return;
+
+            _document.P();
+            _document.H2().SetText("HTTP header parameters");
+            var table = _document.Table();
+            table.AddColumns(new TextContent("NAME"), new TextContent("TYPE"), new TextContent("DESCRIPTION"));
+            foreach (var parameter in docEntryHeaderParameter)
+            {
+                var nameCell = HtmlElement.Label().SetText(parameter.Name ?? "");
+                if (parameter.IsRequired)
+                {
+                    nameCell.AddChildElement(HtmlElement.Label().SetText("*").SetStyle("color", "red"));
+                }
+                var typeCell = new TextContent(parameter.Type ?? "");
+
+                var descriptionCell = new TextContent(parameter.Description ?? "");
+                //WriteDetailedDescription(descriptionCell, parameter);
+                table.AddRow(nameCell, typeCell, descriptionCell);
+            }
+        }
+
         protected override void DrawPathParameters(List<Parameter> docEntryPathParameters)
         {
             if (!docEntryPathParameters.Any()) return;

@@ -104,6 +104,7 @@ namespace Swagger2Pdf.PdfModel
                     DrawEndpointHeader(docEntry);
                     DrawPathParameters(docEntry.PathParameters ?? new List<Parameter>());
                     DrawQueryParameters(docEntry.QueryParameter ?? new List<Parameter>());
+                    DrawHeaderParameters(docEntry.HeaderParameters ?? new List<Parameter>());
                     DrawFormDataParameters(docEntry.FormDataParameters ?? new List<Parameter>());
                     DrawBodyParameters(docEntry.BodyParameters ?? new List<Parameter>());
                     DrawResponses(docEntry.Responses);
@@ -123,6 +124,8 @@ namespace Swagger2Pdf.PdfModel
         protected abstract void DrawFormDataParameters(List<Parameter> docEntryFormDataParameters);
 
         protected abstract void DrawQueryParameters(List<Parameter> docEntryQueryParameter);
+
+        protected abstract void DrawHeaderParameters(List<Parameter> docEntryQueryParameter);
 
         protected abstract void DrawPathParameters(List<Parameter> docEntryPathParameters);
 
