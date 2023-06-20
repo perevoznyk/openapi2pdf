@@ -2,7 +2,7 @@
   "profiles": {
     "Swagger2Pdf": {
       "commandName": "Project",
-      "commandLineArgs": "--input \"XNR.yml\" --output ./XNR.pdf "
+      "commandLineArgs": "--input \"PMS.yaml\" --output ./PMS.pdf "
     }
   }
 }

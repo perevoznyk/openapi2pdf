@@ -90,6 +90,7 @@ namespace Swagger2Pdf.PdfModel
                         DrawEndpointHeader(docEntry);
                         DrawPathParameters(docEntry.PathParameters ?? new List<Parameter>());
                         DrawQueryParameters(docEntry.QueryParameter ?? new List<Parameter>());
+                        DrawHeaderParameters(docEntry.HeaderParameters ?? new List<Parameter>());
                         DrawFormDataParameters(docEntry.FormDataParameters ?? new List<Parameter>());
                         DrawBodyParameters(docEntry.BodyParameters ?? new List<Parameter>());
                         DrawResponses(docEntry.Responses);
