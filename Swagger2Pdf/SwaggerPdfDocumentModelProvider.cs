@@ -127,6 +127,7 @@ namespace Swagger2Pdf
         private static IEnumerable<EndpointInfo> BuildEndpointEntry(KeyValuePair<string, Dictionary<string, Operation>> path, SchemaResolutionContext schemaResolutionContext)
         {
             Logger.Info($"Processing endpoint: {path.Key}");
+            
             return path.Value.Select(httpMethod => new EndpointInfo
             {
                 EndpointPath = path.Key,
