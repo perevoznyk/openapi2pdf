@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31515.178
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Swagger2Pdf", "Swagger2Pdf\Swagger2Pdf.csproj", "{273FBE15-CC1F-40F2-96B3-A3F4EB33B0C8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Swagger2Pdf.Tests", "Swagger2Pdf.Tests\Swagger2Pdf.Tests.csproj", "{78C6B602-B308-4182-BD7C-335FDDA7DE76}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "swagger2pdf-setup", "swagger2pdf-setup\swagger2pdf-setup.vdproj", "{FD400C20-4508-4F10-8356-A02EB2D4D0DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,8 @@ Global
 		{78C6B602-B308-4182-BD7C-335FDDA7DE76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78C6B602-B308-4182-BD7C-335FDDA7DE76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78C6B602-B308-4182-BD7C-335FDDA7DE76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD400C20-4508-4F10-8356-A02EB2D4D0DB}.Debug|Any CPU.ActiveCfg = Debug
+		{FD400C20-4508-4F10-8356-A02EB2D4D0DB}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

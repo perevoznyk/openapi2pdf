@@ -2,7 +2,7 @@
   "profiles": {
     "Swagger2Pdf": {
       "commandName": "Project",
-      "commandLineArgs": "--input \"cjcs-rest.yaml\" --output ./cjcs-rest.pdf "
+      "commandLineArgs": "--input \"portada.json\" --output ./PortadaAPI.pdf "
     }
   }
 }
